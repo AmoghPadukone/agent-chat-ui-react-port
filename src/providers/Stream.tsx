@@ -146,6 +146,11 @@ export const StreamProvider: React.FC<{ children: ReactNode }> = ({
 
   const { apiUrl, assistantId, apiKey } = config;
 
+  // Local state for form inputs (to avoid triggering re-render on every keystroke)
+  const [formApiUrl, setFormApiUrl] = useState(apiUrl);
+  const [formAssistantId, setFormAssistantId] = useState(assistantId);
+  const [formApiKey, setFormApiKey] = useState(apiKey);
+
   // Determine final values to use, prioritizing store values then env vars
   const finalApiUrl = apiUrl || envApiUrl;
   const finalAssistantId = assistantId || envAssistantId;
@@ -165,8 +170,8 @@ export const StreamProvider: React.FC<{ children: ReactNode }> = ({
               <Input
                 id="apiUrl"
                 placeholder={DEFAULT_API_URL}
-                value={apiUrl}
-                onChange={(e) => setApiUrl(e.target.value)}
+                value={formApiUrl}
+                onChange={(e) => setFormApiUrl(e.target.value)}
               />
             </div>
             <div className="space-y-2">
@@ -174,8 +179,8 @@ export const StreamProvider: React.FC<{ children: ReactNode }> = ({
               <Input
                 id="assistantId"
                 placeholder={DEFAULT_ASSISTANT_ID}
-                value={assistantId}
-                onChange={(e) => setAssistantId(e.target.value)}
+                value={formAssistantId}
+                onChange={(e) => setFormAssistantId(e.target.value)}
               />
             </div>
             <div className="space-y-2">
@@ -183,17 +188,22 @@ export const StreamProvider: React.FC<{ children: ReactNode }> = ({
               <PasswordInput
                 id="apiKey"
                 placeholder="Enter your LangSmith API key"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
+                value={formApiKey}
+                onChange={(e) => setFormApiKey(e.target.value)}
               />
             </div>
             <Button
               className="w-full"
               onClick={() => {
-                // Values are already set in store via onChange handlers
-                // The component will re-render and show the chat interface
+                // Use placeholder defaults if inputs are empty
+                const urlToSet = formApiUrl.trim() || DEFAULT_API_URL;
+                const assistantToSet = formAssistantId.trim() || DEFAULT_ASSISTANT_ID;
+                
+                setApiUrl(urlToSet);
+                setAssistantId(assistantToSet);
+                setApiKey(formApiKey);
               }}
-              disabled={!apiUrl.trim() || !assistantId.trim()}
+              disabled={false}
             >
               Continue
               <ArrowRight className="ml-2 h-4 w-4" />
