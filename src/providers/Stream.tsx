@@ -14,7 +14,6 @@ import {
   type UIMessage,
   type RemoveUIMessage,
 } from "@langchain/langgraph-sdk/react-ui";
-import { useQueryState } from "nuqs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { LangGraphLogoSVG } from "@/components/icons/langgraph";
@@ -24,6 +23,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { getApiKey } from "@/lib/api-key";
 import { useThreads } from "./Thread";
 import { toast } from "sonner";
+import { useChatStore } from "@/stores/chat";
 
 export type StateType = { messages: Message[]; ui?: UIMessage[] };
 
@@ -77,7 +77,8 @@ const StreamSession = ({
   apiUrl: string;
   assistantId: string;
 }) => {
-  const [threadId, setThreadId] = useQueryState("threadId");
+  const threadId = useChatStore((state) => state.threadId);
+  const setThreadId = useChatStore((state) => state.setThreadId);
   const { getThreads, setThreads } = useThreads();
   const streamValue = useTypedStream({
     apiUrl,
@@ -134,134 +135,76 @@ export const StreamProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   // Get environment variables
-  const envApiUrl: string | undefined = process.env.NEXT_PUBLIC_API_URL;
-  const envAssistantId: string | undefined =
-    process.env.NEXT_PUBLIC_ASSISTANT_ID;
+  const envApiUrl: string | undefined = import.meta.env.VITE_API_URL;
+  const envAssistantId: string | undefined = import.meta.env.VITE_ASSISTANT_ID;
 
-  // Use URL params with env var fallbacks
-  const [apiUrl, setApiUrl] = useQueryState("apiUrl", {
-    defaultValue: envApiUrl || "",
-  });
-  const [assistantId, setAssistantId] = useQueryState("assistantId", {
-    defaultValue: envAssistantId || "",
-  });
+  // Use chat store
+  const config = useChatStore((state) => state.config);
+  const setApiUrl = useChatStore((state) => state.setApiUrl);
+  const setAssistantId = useChatStore((state) => state.setAssistantId);
+  const setApiKey = useChatStore((state) => state.setApiKey);
 
-  // For API key, use localStorage with env var fallback
-  const [apiKey, _setApiKey] = useState(() => {
-    const storedKey = getApiKey();
-    return storedKey || "";
-  });
+  const { apiUrl, assistantId, apiKey } = config;
 
-  const setApiKey = (key: string) => {
-    window.localStorage.setItem("lg:chat:apiKey", key);
-    _setApiKey(key);
-  };
-
-  // Determine final values to use, prioritizing URL params then env vars
+  // Determine final values to use, prioritizing store values then env vars
   const finalApiUrl = apiUrl || envApiUrl;
   const finalAssistantId = assistantId || envAssistantId;
 
   // Show the form if we: don't have an API URL, or don't have an assistant ID
   if (!finalApiUrl || !finalAssistantId) {
     return (
-      <div className="flex min-h-screen w-full items-center justify-center p-4">
-        <div className="animate-in fade-in-0 zoom-in-95 bg-background flex max-w-3xl flex-col rounded-lg border shadow-lg">
-          <div className="mt-14 flex flex-col gap-2 border-b p-6">
-            <div className="flex flex-col items-start gap-2">
-              <LangGraphLogoSVG className="h-7" />
-              <h1 className="text-xl font-semibold tracking-tight">
-                Agent Chat
-              </h1>
-            </div>
-            <p className="text-muted-foreground">
-              Welcome to Agent Chat! Before you get started, you need to enter
-              the URL of the deployment and the assistant / graph ID.
-            </p>
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="w-full max-w-md space-y-6 rounded-lg border bg-card p-6 shadow-lg">
+          <div className="flex items-center justify-center space-x-2">
+            <LangGraphLogoSVG className="h-8 w-8" />
+            <h1 className="text-2xl font-bold">Agent Chat</h1>
           </div>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-
-              const form = e.target as HTMLFormElement;
-              const formData = new FormData(form);
-              const apiUrl = formData.get("apiUrl") as string;
-              const assistantId = formData.get("assistantId") as string;
-              const apiKey = formData.get("apiKey") as string;
-
-              setApiUrl(apiUrl);
-              setApiKey(apiKey);
-              setAssistantId(assistantId);
-
-              form.reset();
-            }}
-            className="bg-muted/50 flex flex-col gap-6 p-6"
-          >
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="apiUrl">
-                Deployment URL<span className="text-rose-500">*</span>
-              </Label>
-              <p className="text-muted-foreground text-sm">
-                This is the URL of your LangGraph deployment. Can be a local, or
-                production deployment.
-              </p>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="apiUrl">LangGraph Deployment URL</Label>
               <Input
                 id="apiUrl"
-                name="apiUrl"
-                className="bg-background"
-                defaultValue={apiUrl || DEFAULT_API_URL}
-                required
+                placeholder={DEFAULT_API_URL}
+                value={apiUrl}
+                onChange={(e) => setApiUrl(e.target.value)}
               />
             </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="assistantId">
-                Assistant / Graph ID<span className="text-rose-500">*</span>
-              </Label>
-              <p className="text-muted-foreground text-sm">
-                This is the ID of the graph (can be the graph name), or
-                assistant to fetch threads from, and invoke when actions are
-                taken.
-              </p>
+            <div className="space-y-2">
+              <Label htmlFor="assistantId">Assistant/Graph ID</Label>
               <Input
                 id="assistantId"
-                name="assistantId"
-                className="bg-background"
-                defaultValue={assistantId || DEFAULT_ASSISTANT_ID}
-                required
+                placeholder={DEFAULT_ASSISTANT_ID}
+                value={assistantId}
+                onChange={(e) => setAssistantId(e.target.value)}
               />
             </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="apiKey">LangSmith API Key</Label>
-              <p className="text-muted-foreground text-sm">
-                This is <strong>NOT</strong> required if using a local LangGraph
-                server. This value is stored in your browser's local storage and
-                is only used to authenticate requests sent to your LangGraph
-                server.
-              </p>
+            <div className="space-y-2">
+              <Label htmlFor="apiKey">LangSmith API Key (optional)</Label>
               <PasswordInput
                 id="apiKey"
-                name="apiKey"
-                defaultValue={apiKey ?? ""}
-                className="bg-background"
-                placeholder="lsv2_pt_..."
+                placeholder="Enter your LangSmith API key"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
               />
             </div>
-
-            <div className="mt-2 flex justify-end">
-              <Button
-                type="submit"
-                size="lg"
-              >
-                Continue
-                <ArrowRight className="size-5" />
-              </Button>
-            </div>
-          </form>
+            <Button
+              className="w-full"
+              onClick={() => {
+                // Values are already set in store via onChange handlers
+                // The component will re-render and show the chat interface
+              }}
+              disabled={!apiUrl.trim() || !assistantId.trim()}
+            >
+              Continue
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
     );
   }
+
+  // If we have the required values, render the StreamSession
 
   return (
     <StreamSession

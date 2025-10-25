@@ -4,7 +4,7 @@ import { Thread } from "@langchain/langgraph-sdk";
 import { useEffect } from "react";
 
 import { getContentString } from "../utils";
-import { useQueryState, parseAsBoolean } from "nuqs";
+import { useChatStore } from "@/stores/chat";
 import {
   Sheet,
   SheetContent,
@@ -22,7 +22,10 @@ function ThreadList({
   threads: Thread[];
   onThreadClick?: (threadId: string) => void;
 }) {
-  const [threadId, setThreadId] = useQueryState("threadId");
+  const threadId = useChatStore((state) => state.threadId);
+  const setThreadId = useChatStore((state) => state.setThreadId);
+  const chatHistoryOpen = useChatStore((state) => state.ui.chatHistoryOpen);
+  const setChatHistoryOpen = useChatStore((state) => state.setChatHistoryOpen);
 
   return (
     <div className="flex h-full w-full flex-col items-start justify-start gap-2 overflow-y-scroll [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:bg-transparent">
@@ -77,10 +80,8 @@ function ThreadHistoryLoading() {
 
 export default function ThreadHistory() {
   const isLargeScreen = useMediaQuery("(min-width: 1024px)");
-  const [chatHistoryOpen, setChatHistoryOpen] = useQueryState(
-    "chatHistoryOpen",
-    parseAsBoolean.withDefault(false),
-  );
+  const chatHistoryOpen = useChatStore((state) => state.ui.chatHistoryOpen);
+  const setChatHistoryOpen = useChatStore((state) => state.setChatHistoryOpen);
 
   const { getThreads, threads, setThreads, threadsLoading, setThreadsLoading } =
     useThreads();
@@ -101,7 +102,7 @@ export default function ThreadHistory() {
           <Button
             className="hover:bg-gray-100"
             variant="ghost"
-            onClick={() => setChatHistoryOpen((p) => !p)}
+            onClick={() => setChatHistoryOpen(!chatHistoryOpen)}
           >
             {chatHistoryOpen ? (
               <PanelRightOpen className="size-5" />
@@ -136,7 +137,7 @@ export default function ThreadHistory() {
             </SheetHeader>
             <ThreadList
               threads={threads}
-              onThreadClick={() => setChatHistoryOpen((o) => !o)}
+              onThreadClick={() => setChatHistoryOpen(!chatHistoryOpen)}
             />
           </SheetContent>
         </Sheet>

@@ -23,11 +23,11 @@ import {
   XIcon,
   Plus,
 } from "lucide-react";
-import { useQueryState, parseAsBoolean } from "nuqs";
 import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
 import ThreadHistory from "./history";
 import { toast } from "sonner";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useChatStore } from "@/stores/chat";
 import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
 import { GitHubSVG } from "../icons/github";
@@ -115,15 +115,12 @@ export function Thread() {
   const [artifactContext, setArtifactContext] = useArtifactContext();
   const [artifactOpen, closeArtifact] = useArtifactOpen();
 
-  const [threadId, _setThreadId] = useQueryState("threadId");
-  const [chatHistoryOpen, setChatHistoryOpen] = useQueryState(
-    "chatHistoryOpen",
-    parseAsBoolean.withDefault(false),
-  );
-  const [hideToolCalls, setHideToolCalls] = useQueryState(
-    "hideToolCalls",
-    parseAsBoolean.withDefault(false),
-  );
+  const threadId = useChatStore((state) => state.threadId);
+  const setThreadId = useChatStore((state) => state.setThreadId);
+  const chatHistoryOpen = useChatStore((state) => state.ui.chatHistoryOpen);
+  const setChatHistoryOpen = useChatStore((state) => state.setChatHistoryOpen);
+  const hideToolCalls = useChatStore((state) => state.ui.hideToolCalls);
+  const setHideToolCalls = useChatStore((state) => state.setHideToolCalls);
   const [input, setInput] = useState("");
   const {
     contentBlocks,
@@ -144,8 +141,8 @@ export function Thread() {
 
   const lastError = useRef<string | undefined>(undefined);
 
-  const setThreadId = (id: string | null) => {
-    _setThreadId(id);
+  const handleSetThreadId = (id: string | null) => {
+    setThreadId(id);
 
     // close artifact and reset artifact context
     closeArtifact();
@@ -315,7 +312,7 @@ export function Thread() {
                   <Button
                     className="hover:bg-gray-100"
                     variant="ghost"
-                    onClick={() => setChatHistoryOpen((p) => !p)}
+                    onClick={() => setChatHistoryOpen(!chatHistoryOpen)}
                   >
                     {chatHistoryOpen ? (
                       <PanelRightOpen className="size-5" />
@@ -338,7 +335,7 @@ export function Thread() {
                     <Button
                       className="hover:bg-gray-100"
                       variant="ghost"
-                      onClick={() => setChatHistoryOpen((p) => !p)}
+                      onClick={() => setChatHistoryOpen(!chatHistoryOpen)}
                     >
                       {chatHistoryOpen ? (
                         <PanelRightOpen className="size-5" />
@@ -350,7 +347,7 @@ export function Thread() {
                 </div>
                 <motion.button
                   className="flex cursor-pointer items-center gap-2"
-                  onClick={() => setThreadId(null)}
+                  onClick={() => handleSetThreadId(null)}
                   animate={{
                     marginLeft: !chatHistoryOpen ? 48 : 0,
                   }}
@@ -379,7 +376,7 @@ export function Thread() {
                   className="p-4"
                   tooltip="New thread"
                   variant="ghost"
-                  onClick={() => setThreadId(null)}
+                  onClick={() => handleSetThreadId(null)}
                 >
                   <SquarePen className="size-5" />
                 </TooltipIconButton>

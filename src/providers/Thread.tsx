@@ -1,7 +1,6 @@
 import { validate } from "uuid";
 import { getApiKey } from "@/lib/api-key";
 import { Thread } from "@langchain/langgraph-sdk";
-import { useQueryState } from "nuqs";
 import {
   createContext,
   useContext,
@@ -12,6 +11,7 @@ import {
   SetStateAction,
 } from "react";
 import { createClient } from "./client";
+import { useChatStore } from "@/stores/chat";
 
 interface ThreadContextType {
   getThreads: () => Promise<Thread[]>;
@@ -34,8 +34,8 @@ function getThreadSearchMetadata(
 }
 
 export function ThreadProvider({ children }: { children: ReactNode }) {
-  const [apiUrl] = useQueryState("apiUrl");
-  const [assistantId] = useQueryState("assistantId");
+  const config = useChatStore((state) => state.config);
+  const { apiUrl, assistantId } = config;
   const [threads, setThreads] = useState<Thread[]>([]);
   const [threadsLoading, setThreadsLoading] = useState(false);
 

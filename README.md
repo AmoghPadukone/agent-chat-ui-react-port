@@ -1,6 +1,6 @@
 # Agent Chat UI
 
-Agent Chat UI is a Next.js application which enables chatting with any LangGraph server with a `messages` key through a chat interface.
+Agent Chat UI is a React + Vite application which enables chatting with any LangGraph server with a `messages` key through a chat interface.
 
 > [!NOTE]
 > 🎥 Watch the video setup guide [here](https://youtu.be/lInrwVnZ83o).
@@ -27,13 +27,13 @@ cd agent-chat-ui
 Install dependencies:
 
 ```bash
-pnpm install
+npm install
 ```
 
 Run the app:
 
 ```bash
-pnpm dev
+npm run dev
 ```
 
 The app will be available at `http://localhost:3000`.
@@ -53,8 +53,8 @@ After entering these values, click `Continue`. You'll then be redirected to a ch
 You can bypass the initial setup form by setting the following environment variables:
 
 ```bash
-NEXT_PUBLIC_API_URL=http://localhost:2024
-NEXT_PUBLIC_ASSISTANT_ID=agent
+VITE_API_URL=http://localhost:2024
+VITE_ASSISTANT_ID=agent
 ```
 
 > [!TIP]
