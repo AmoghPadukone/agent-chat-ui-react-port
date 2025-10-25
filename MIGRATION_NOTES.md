@@ -5,7 +5,8 @@
 ### What Changed
 - **Framework**: Next.js 15 → React 19 + Vite 6
 - **State**: nuqs + scattered → Zustand store with slices
-- **Routing**: Next.js App Router → React Router
+- **Routing**: Next.js App Router → Single Page App (no routing needed)
+- **URL Sync**: Native browser APIs (`URLSearchParams`, `window.history`)
 - **Env Vars**: `NEXT_PUBLIC_*` → `VITE_*`
 
 ### What Stayed the Same
