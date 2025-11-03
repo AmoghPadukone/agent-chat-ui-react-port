@@ -7,7 +7,7 @@ import React, { type ReactNode } from 'react';
 import { Thread } from '@/components/thread';
 import { ChatProvider, type ChatProviderProps } from './ChatProvider';
 import { Toaster } from '@/components/ui/sonner';
-import type { ChatStoreOptions } from '@/stores/chat';
+import type { ChatStoreOptions } from '@/stores/agent-chat-ui';
 
 export interface ChatInterfaceProps extends Omit<ChatProviderProps, 'children'> {
   /** Default API URL */
@@ -16,8 +16,14 @@ export interface ChatInterfaceProps extends Omit<ChatProviderProps, 'children'> 
   defaultAssistantId?: string;
   /** Default API Key */
   defaultApiKey?: string;
-  /** Enable URL synchronization (default: true) */
+  /** Initial Thread ID (useful when integrating into apps with path-based routing) */
+  initialThreadId?: string | null;
+  /** Enable URL synchronization (default: false) */
   enableUrlSync?: boolean;
+  /** Enable URL sync from path (extract threadId from URL path instead of query params) */
+  syncFromPath?: boolean;
+  /** Pattern to extract threadId from path (e.g., '/workspaces/:workspaceId/thread/:threadId') */
+  threadIdPathPattern?: string;
   /** Persist to localStorage (default: true) */
   persistToLocalStorage?: boolean;
   /** Custom className for the container */
@@ -54,7 +60,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   defaultApiUrl,
   defaultAssistantId,
   defaultApiKey,
-  enableUrlSync = true,
+  initialThreadId,
+  enableUrlSync = false,
+  syncFromPath = false,
+  threadIdPathPattern,
   persistToLocalStorage = true,
   className,
   onConfigChange,
@@ -68,7 +77,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       assistantId: defaultAssistantId || '',
       apiKey: defaultApiKey || '',
     },
+    initialThreadId,
     enableUrlSync,
+    syncFromPath,
+    threadIdPathPattern,
     persistToLocalStorage,
   };
 

@@ -56,6 +56,8 @@ export interface ThreadSlice {
 export interface SyncOptions {
   enableUrlSync: boolean;
   persistToLocalStorage: boolean;
+  syncFromPath?: boolean;
+  threadIdPathPattern?: string;
 }
 
 export interface SyncSlice {
@@ -77,7 +79,10 @@ export type ChatStore = ConfigSlice & UISlice & ThreadSlice & SyncSlice;
 
 export interface ChatStoreOptions {
   defaultConfig?: Partial<ChatConfig>;
+  initialThreadId?: string | null;
   enableUrlSync?: boolean;
+  syncFromPath?: boolean;
+  threadIdPathPattern?: string;
   persistToLocalStorage?: boolean;
 }
 

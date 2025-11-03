@@ -20,28 +20,40 @@ export const createUISlice: StateCreator<
     set((state) => ({
       ui: { ...state.ui, chatHistoryOpen: open },
     }));
-    get().syncToUrl();
+    // Only sync to URL if enabled
+    if (get().syncOptions.enableUrlSync) {
+      get().syncToUrl();
+    }
   },
 
   toggleChatHistory: () => {
     set((state) => ({
       ui: { ...state.ui, chatHistoryOpen: !state.ui.chatHistoryOpen },
     }));
-    get().syncToUrl();
+    // Only sync to URL if enabled
+    if (get().syncOptions.enableUrlSync) {
+      get().syncToUrl();
+    }
   },
 
   setHideToolCalls: (hide: boolean) => {
     set((state) => ({
       ui: { ...state.ui, hideToolCalls: hide },
     }));
-    get().syncToUrl();
+    // Only sync to URL if enabled
+    if (get().syncOptions.enableUrlSync) {
+      get().syncToUrl();
+    }
   },
 
   toggleHideToolCalls: () => {
     set((state) => ({
       ui: { ...state.ui, hideToolCalls: !state.ui.hideToolCalls },
     }));
-    get().syncToUrl();
+    // Only sync to URL if enabled
+    if (get().syncOptions.enableUrlSync) {
+      get().syncToUrl();
+    }
   },
 });
 

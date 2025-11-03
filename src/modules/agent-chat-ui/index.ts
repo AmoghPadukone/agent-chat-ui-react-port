@@ -71,7 +71,7 @@ export {
   useThreadId,
   useThreadActions,
   useSyncActions,
-} from '@/stores/chat';
+} from '@/stores/agent-chat-ui';
 
 // ============================================================================
 // Types
@@ -87,5 +87,5 @@ export type {
   SyncSlice,
   SyncOptions,
   ChatStoreOptions,
-} from '@/stores/chat';
+} from '@/stores/agent-chat-ui';
 

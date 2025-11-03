@@ -21,23 +21,33 @@ export const createConfigSlice: StateCreator<
     set((state) => ({
       config: { ...state.config, apiUrl },
     }));
-    get().syncToUrl();
+    // Only sync to URL if enabled
+    if (get().syncOptions.enableUrlSync) {
+      get().syncToUrl();
+    }
   },
 
   setAssistantId: (assistantId: string) => {
     set((state) => ({
       config: { ...state.config, assistantId },
     }));
-    get().syncToUrl();
+    // Only sync to URL if enabled
+    if (get().syncOptions.enableUrlSync) {
+      get().syncToUrl();
+    }
   },
 
   setApiKey: (apiKey: string) => {
     set((state) => ({
       config: { ...state.config, apiKey },
     }));
-    // Store API key in localStorage separately for security
-    if (typeof window !== 'undefined') {
+    // Note: API key is NOT persisted to localStorage via Zustand persist middleware
+    // for security reasons. Store it separately if needed.
+    if (typeof window !== 'undefined' && apiKey) {
       window.localStorage.setItem('lg:chat:apiKey', apiKey);
+    } else if (typeof window !== 'undefined' && !apiKey) {
+      // Remove from localStorage if apiKey is cleared
+      window.localStorage.removeItem('lg:chat:apiKey');
     }
   },
 
@@ -45,7 +55,10 @@ export const createConfigSlice: StateCreator<
     set((state) => ({
       config: { ...state.config, ...configUpdate },
     }));
-    get().syncToUrl();
+    // Only sync to URL if enabled
+    if (get().syncOptions.enableUrlSync) {
+      get().syncToUrl();
+    }
   },
 
   hasValidConfig: () => {

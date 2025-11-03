@@ -19,7 +19,10 @@ import type { ChatStore, ChatStoreOptions } from './types';
 export const createChatStore = (options: ChatStoreOptions = {}) => {
   const {
     defaultConfig = {},
-    enableUrlSync = true,
+    initialThreadId,
+    enableUrlSync = false,
+    syncFromPath = false,
+    threadIdPathPattern,
     persistToLocalStorage = true,
   } = options;
 
@@ -40,10 +43,15 @@ export const createChatStore = (options: ChatStoreOptions = {}) => {
             apiKey: defaultConfig.apiKey || '',
           },
 
+          // Initialize thread ID if provided
+          threadId: initialThreadId ?? null,
+
           // Initialize sync options
           syncOptions: {
             enableUrlSync,
             persistToLocalStorage,
+            syncFromPath,
+            threadIdPathPattern,
           },
         }),
         {

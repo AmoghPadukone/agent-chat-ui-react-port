@@ -11,7 +11,7 @@ import { MessageContentComplex } from "@langchain/core/messages";
 import { Fragment } from "react/jsx-runtime";
 import { isAgentInboxInterruptSchema } from "@/lib/agent-inbox-interrupt";
 import { ThreadView } from "../agent-inbox";
-import { useChatStore } from "@/stores/chat";
+import { useChatStore } from "@/stores/agent-chat-ui";
 import { GenericInterruptView } from "./generic-interrupt";
 import { useArtifact } from "../artifact";
 

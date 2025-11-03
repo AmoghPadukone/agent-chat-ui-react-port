@@ -15,12 +15,18 @@ export const createThreadSlice: StateCreator<
 
   setThreadId: (threadId: string | null) => {
     set({ threadId });
-    get().syncToUrl();
+    // Only sync to URL if enabled
+    if (get().syncOptions.enableUrlSync) {
+      get().syncToUrl();
+    }
   },
 
   clearThread: () => {
     set({ threadId: null });
-    get().syncToUrl();
+    // Only sync to URL if enabled
+    if (get().syncOptions.enableUrlSync) {
+      get().syncToUrl();
+    }
   },
 });
 

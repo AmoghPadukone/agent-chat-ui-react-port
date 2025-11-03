@@ -1,13 +1,18 @@
 import React from "react";
-import { ChatInterface } from "@/modules/chat";
+import { ChatInterface } from "@/modules/agent-chat-ui";
 
 function App() {
+  const threadId = "8c70b578-6fb6-4ed3-812d-75d7d5df1349";
+
+
   return (
     <ChatInterface
-      defaultApiUrl={import.meta.env.VITE_API_URL}
-      defaultAssistantId={import.meta.env.VITE_ASSISTANT_ID}
-      enableUrlSync={true}
-      persistToLocalStorage={true}
+    defaultApiUrl="http://localhost:2024"
+    defaultAssistantId="agent"
+      enableUrlSync={false}
+      initialThreadId={threadId}
+
+      persistToLocalStorage={false}
       className="h-screen w-screen"
       onConfigChange={(config) => {
         console.log('Chat config changed:', config);

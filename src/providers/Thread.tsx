@@ -1,5 +1,4 @@
 import { validate } from "uuid";
-import { getApiKey } from "@/lib/api-key";
 import { Thread } from "@langchain/langgraph-sdk";
 import {
   createContext,
@@ -11,7 +10,7 @@ import {
   SetStateAction,
 } from "react";
 import { createClient } from "./client";
-import { useChatStore } from "@/stores/chat";
+import { useChatStore } from "@/stores/agent-chat-ui";
 
 interface ThreadContextType {
   getThreads: () => Promise<Thread[]>;
@@ -35,13 +34,13 @@ function getThreadSearchMetadata(
 
 export function ThreadProvider({ children }: { children: ReactNode }) {
   const config = useChatStore((state) => state.config);
-  const { apiUrl, assistantId } = config;
+  const { apiUrl, assistantId, apiKey } = config;
   const [threads, setThreads] = useState<Thread[]>([]);
   const [threadsLoading, setThreadsLoading] = useState(false);
 
   const getThreads = useCallback(async (): Promise<Thread[]> => {
     if (!apiUrl || !assistantId) return [];
-    const client = createClient(apiUrl, getApiKey() ?? undefined);
+    const client = createClient(apiUrl, apiKey || undefined);
 
     const threads = await client.threads.search({
       metadata: {
@@ -51,7 +50,7 @@ export function ThreadProvider({ children }: { children: ReactNode }) {
     });
 
     return threads;
-  }, [apiUrl, assistantId]);
+  }, [apiUrl, assistantId, apiKey]);
 
   const value = {
     getThreads,

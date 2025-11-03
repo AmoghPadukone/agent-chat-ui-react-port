@@ -27,7 +27,7 @@ import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
 import ThreadHistory from "./history";
 import { toast } from "sonner";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { useChatStore } from "@/stores/chat";
+import { useChatStore } from "@/stores/agent-chat-ui";
 import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
 import { GitHubSVG } from "../icons/github";
@@ -327,9 +327,9 @@ export function Thread() {
               </div>
             </div>
           )}
-          {chatStarted && (
-            <div className="relative z-10 flex items-center justify-between gap-3 p-2">
-              <div className="relative flex items-center justify-start gap-2">
+          {/* {chatStarted && ( */}
+             {/* <div className="relative z-10 flex items-center justify-between gap-3 p-2"> */}
+              {/* <div className="relative flex items-center justify-start gap-2">
                 <div className="absolute left-0 z-10">
                   {(!chatHistoryOpen || !isLargeScreen) && (
                     <Button
@@ -365,9 +365,9 @@ export function Thread() {
                     Agent Chat
                   </span>
                 </motion.button>
-              </div>
+              </div> */}
 
-              <div className="flex items-center gap-4">
+              {/* <div className="flex items-center gap-4">
                 <div className="flex items-center">
                   <OpenGitHubRepo />
                 </div>
@@ -380,11 +380,11 @@ export function Thread() {
                 >
                   <SquarePen className="size-5" />
                 </TooltipIconButton>
-              </div>
+              </div> */}
 
-              <div className="from-background to-background/0 absolute inset-x-0 top-full h-5 bg-gradient-to-b" />
-            </div>
-          )}
+              {/* <div className="from-background to-background/0 absolute inset-x-0 top-full h-5 bg-gradient-to-b" /> */}
+            {/* </div> */}
+           {/* )} */}
 
           <StickToBottom className="relative flex-1 overflow-hidden">
             <StickyToBottomContent

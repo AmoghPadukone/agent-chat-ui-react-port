@@ -4,7 +4,7 @@ import { Thread } from "@langchain/langgraph-sdk";
 import { useEffect } from "react";
 
 import { getContentString } from "../utils";
-import { useChatStore } from "@/stores/chat";
+import { useChatStore } from "@/stores/agent-chat-ui";
 import {
   Sheet,
   SheetContent,

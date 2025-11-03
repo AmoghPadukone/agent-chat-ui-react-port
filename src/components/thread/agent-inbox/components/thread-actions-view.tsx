@@ -4,7 +4,7 @@ import { InboxItemInput } from "./inbox-item-input";
 import useInterruptedActions from "../hooks/use-interrupted-actions";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { useChatStore } from "@/stores/chat";
+import { useChatStore } from "@/stores/agent-chat-ui";
 import { constructOpenInStudioURL } from "../utils";
 import { HumanInterrupt } from "@langchain/langgraph/prebuilt";
 

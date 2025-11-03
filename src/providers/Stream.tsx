@@ -2,7 +2,6 @@ import React, {
   createContext,
   useContext,
   ReactNode,
-  useState,
   useEffect,
 } from "react";
 import { useStream } from "@langchain/langgraph-sdk/react";
@@ -14,16 +13,9 @@ import {
   type UIMessage,
   type RemoveUIMessage,
 } from "@langchain/langgraph-sdk/react-ui";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { LangGraphLogoSVG } from "@/components/icons/langgraph";
-import { Label } from "@/components/ui/label";
-import { ArrowRight } from "lucide-react";
-import { PasswordInput } from "@/components/ui/password-input";
-import { getApiKey } from "@/lib/api-key";
 import { useThreads } from "./Thread";
 import { toast } from "sonner";
-import { useChatStore } from "@/stores/chat";
+import { useChatStore } from "@/stores/agent-chat-ui";
 
 export type StateType = { messages: Message[]; ui?: UIMessage[] };
 
@@ -127,94 +119,28 @@ const StreamSession = ({
   );
 };
 
-// Default values for the form
-const DEFAULT_API_URL = "http://localhost:2024";
-const DEFAULT_ASSISTANT_ID = "agent";
-
 export const StreamProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  // Get environment variables
-  const envApiUrl: string | undefined = import.meta.env.VITE_API_URL;
-  const envAssistantId: string | undefined = import.meta.env.VITE_ASSISTANT_ID;
-
-  // Use chat store
   const config = useChatStore((state) => state.config);
-  const setApiUrl = useChatStore((state) => state.setApiUrl);
-  const setAssistantId = useChatStore((state) => state.setAssistantId);
-  const setApiKey = useChatStore((state) => state.setApiKey);
-
   const { apiUrl, assistantId, apiKey } = config;
 
-  // Local state for form inputs (to avoid triggering re-render on every keystroke)
-  const [formApiUrl, setFormApiUrl] = useState(apiUrl);
-  const [formAssistantId, setFormAssistantId] = useState(assistantId);
-  const [formApiKey, setFormApiKey] = useState(apiKey);
-
-  // Determine final values to use, prioritizing store values then env vars
-  const finalApiUrl = apiUrl || envApiUrl;
-  const finalAssistantId = assistantId || envAssistantId;
-
-  // Show the form if we: don't have an API URL, or don't have an assistant ID
-  if (!finalApiUrl || !finalAssistantId) {
+  // Validate required config
+  if (!apiUrl || !assistantId) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="w-full max-w-md space-y-6 rounded-lg border bg-card p-6 shadow-lg">
-          <div className="flex items-center justify-center space-x-2">
-            <LangGraphLogoSVG className="h-8 w-8" />
-            <h1 className="text-2xl font-bold">Agent Chat</h1>
-          </div>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="apiUrl">LangGraph Deployment URL</Label>
-              <Input
-                id="apiUrl"
-                placeholder={DEFAULT_API_URL}
-                value={formApiUrl}
-                onChange={(e) => setFormApiUrl(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="assistantId">Assistant/Graph ID</Label>
-              <Input
-                id="assistantId"
-                placeholder={DEFAULT_ASSISTANT_ID}
-                value={formAssistantId}
-                onChange={(e) => setFormAssistantId(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="apiKey">LangSmith API Key (optional)</Label>
-              <PasswordInput
-                id="apiKey"
-                placeholder="Enter your LangSmith API key"
-                value={formApiKey}
-                onChange={(e) => setFormApiKey(e.target.value)}
-              />
-            </div>
-            <Button
-              className="w-full"
-              onClick={() => {
-                // Use placeholder defaults if inputs are empty
-                const urlToSet = formApiUrl.trim() || DEFAULT_API_URL;
-                const assistantToSet = formAssistantId.trim() || DEFAULT_ASSISTANT_ID;
-                
-                setApiUrl(urlToSet);
-                setAssistantId(assistantToSet);
-                setApiKey(formApiKey);
-              }}
-              disabled={false}
-            >
-              Continue
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
+        <div className="text-center space-y-4">
+          <h1 className="text-2xl font-bold text-destructive">
+            Configuration Required
+          </h1>
+          <p className="text-muted-foreground">
+            Please provide <code>defaultApiUrl</code> and <code>defaultAssistantId</code> props
+            to the ChatInterface component.
+          </p>
         </div>
       </div>
     );
   }
-
-  // If we have the required values, render the StreamSession
 
   return (
     <StreamSession
