@@ -1,6 +1,6 @@
 import React from "react";
 import { File, Image as ImageIcon, X as XIcon } from "lucide-react";
-import type { Base64ContentBlock } from "@langchain/core/messages";
+import type { Base64ContentBlock } from "@/lib/multimodal-utils";
 import { cn } from "@/lib/utils";
 export interface MultimodalPreviewProps {
   block: Base64ContentBlock;
@@ -17,14 +17,32 @@ export const MultimodalPreview: React.FC<MultimodalPreviewProps> = ({
   className,
   size = "md",
 }) => {
-  // Image block
+  // Helper to get mimeType from either format (new: mimeType, deprecated: mime_type)
+  const getMimeType = (b: typeof block): string | undefined => {
+    if ("mimeType" in b && typeof b.mimeType === "string") return b.mimeType;
+    if ("mime_type" in b && typeof b.mime_type === "string") return b.mime_type;
+    return undefined;
+  };
+
+  // Helper to check if it's base64 (new format has data without source_type, deprecated has source_type)
+  const isBase64 = (b: typeof block): boolean => {
+    if ("data" in b && !("source_type" in b)) return true; // New format
+    if ("source_type" in b && b.source_type === "base64") return true; // Deprecated format
+    return false;
+  };
+
+  const mimeType = getMimeType(block);
+
+  // Image block (supports both new and deprecated formats)
   if (
     block.type === "image" &&
-    block.source_type === "base64" &&
-    typeof block.mime_type === "string" &&
-    block.mime_type.startsWith("image/")
+    isBase64(block) &&
+    typeof mimeType === "string" &&
+    mimeType.startsWith("image/") &&
+    "data" in block &&
+    typeof block.data === "string"
   ) {
-    const url = `data:${block.mime_type};base64,${block.data}`;
+    const url = `data:${mimeType};base64,${block.data}`;
     let imgClass: string = "rounded-md object-cover h-16 w-16 text-lg";
     if (size === "sm") imgClass = "rounded-md object-cover h-10 w-10 text-base";
     if (size === "lg") imgClass = "rounded-md object-cover h-24 w-24 text-xl";
@@ -51,11 +69,13 @@ export const MultimodalPreview: React.FC<MultimodalPreviewProps> = ({
     );
   }
 
-  // PDF block
+  // PDF block (supports both new and deprecated formats)
   if (
     block.type === "file" &&
-    block.source_type === "base64" &&
-    block.mime_type === "application/pdf"
+    isBase64(block) &&
+    mimeType === "application/pdf" &&
+    "data" in block &&
+    typeof block.data === "string"
   ) {
     const filename =
       block.metadata?.filename || block.metadata?.name || "PDF file";
@@ -66,7 +86,7 @@ export const MultimodalPreview: React.FC<MultimodalPreviewProps> = ({
           className,
         )}
       >
-        <div className="flex flex-shrink-0 flex-col items-start justify-start">
+        <div className="flex shrink-0 flex-col items-start justify-start">
           <File
             className={cn(
               "text-teal-700",
@@ -102,7 +122,7 @@ export const MultimodalPreview: React.FC<MultimodalPreviewProps> = ({
         className,
       )}
     >
-      <File className="h-5 w-5 flex-shrink-0" />
+      <File className="h-5 w-5 shrink-0" />
       <span className="truncate text-xs">Unsupported file type</span>
       {removable && (
         <button

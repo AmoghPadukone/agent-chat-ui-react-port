@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, ChangeEvent } from "react";
 import { toast } from "sonner";
-import type { Base64ContentBlock } from "@langchain/core/messages";
+import type { Base64ContentBlock } from "@/lib/multimodal-utils";
 import { fileToContentBlock } from "@/lib/multimodal-utils";
 
 export const SUPPORTED_FILE_TYPES = [
@@ -25,11 +25,18 @@ export function useFileUpload({
   const dragCounter = useRef(0);
 
   const isDuplicate = (file: File, blocks: Base64ContentBlock[]) => {
+    // Helper to get mimeType from either format
+    const getMimeType = (b: Base64ContentBlock): string | undefined => {
+      if ("mimeType" in b && typeof b.mimeType === "string") return b.mimeType;
+      if ("mime_type" in b && typeof b.mime_type === "string") return b.mime_type;
+      return undefined;
+    };
+
     if (file.type === "application/pdf") {
       return blocks.some(
         (b) =>
           b.type === "file" &&
-          b.mime_type === "application/pdf" &&
+          getMimeType(b) === "application/pdf" &&
           b.metadata?.filename === file.name,
       );
     }
@@ -38,7 +45,7 @@ export function useFileUpload({
         (b) =>
           b.type === "image" &&
           b.metadata?.name === file.name &&
-          b.mime_type === file.type,
+          getMimeType(b) === file.type,
       );
     }
     return false;
@@ -220,12 +227,19 @@ export function useFileUpload({
     const invalidFiles = files.filter(
       (file) => !SUPPORTED_FILE_TYPES.includes(file.type),
     );
+    // Helper to get mimeType from either format
+    const getMimeType = (b: Base64ContentBlock): string | undefined => {
+      if ("mimeType" in b && typeof b.mimeType === "string") return b.mimeType;
+      if ("mime_type" in b && typeof b.mime_type === "string") return b.mime_type;
+      return undefined;
+    };
+
     const isDuplicate = (file: File) => {
       if (file.type === "application/pdf") {
         return contentBlocks.some(
           (b) =>
             b.type === "file" &&
-            b.mime_type === "application/pdf" &&
+            getMimeType(b) === "application/pdf" &&
             b.metadata?.filename === file.name,
         );
       }
@@ -234,7 +248,7 @@ export function useFileUpload({
           (b) =>
             b.type === "image" &&
             b.metadata?.name === file.name &&
-            b.mime_type === file.type,
+            getMimeType(b) === file.type,
         );
       }
       return false;

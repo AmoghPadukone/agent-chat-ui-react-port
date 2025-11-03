@@ -1,5 +1,5 @@
 import { BaseMessage, isBaseMessage } from "@langchain/core/messages";
-import { format } from "date-fns";
+import dayjs from "dayjs";
 import { startCase } from "lodash";
 import { HumanResponseWithEdits, SubmitType } from "./types";
 import { HumanInterrupt } from "@langchain/langgraph/prebuilt";
@@ -40,8 +40,8 @@ export function baseMessageObject(item: unknown): string {
     }
     if ("type" in item) {
       return `${item.type}:${contentText ? ` ${contentText}` : ""}${toolCallText ? ` - Tool calls: ${toolCallText}` : ""}`;
-    } else if ("_getType" in item) {
-      return `${item._getType()}:${contentText ? ` ${contentText}` : ""}${toolCallText ? ` - Tool calls: ${toolCallText}` : ""}`;
+    } else if ("_getType" in item && typeof (item as any)._getType === "function") {
+      return `${(item as any)._getType()}:${contentText ? ` ${contentText}` : ""}${toolCallText ? ` - Tool calls: ${toolCallText}` : ""}`;
     }
   } else if (
     typeof item === "object" &&
@@ -73,7 +73,7 @@ export function unknownToPrettyDate(input: unknown): string | undefined {
       Object.prototype.toString.call(input) === "[object Date]" ||
       new Date(input as string)
     ) {
-      return format(new Date(input as string), "MM/dd/yyyy hh:mm a");
+      return dayjs(input as string | Date).format("MM/DD/YYYY hh:mm a");
     }
   } catch (_) {
     // failed to parse date. no-op

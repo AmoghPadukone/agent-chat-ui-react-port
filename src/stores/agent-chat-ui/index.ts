@@ -23,56 +23,74 @@ export const createChatStore = (options: ChatStoreOptions = {}) => {
     enableUrlSync = false,
     syncFromPath = false,
     threadIdPathPattern,
-    persistToLocalStorage = true,
+    persistToLocalStorage = false,
   } = options;
 
-  return create<ChatStore>()(
-    devtools(
-      persist(
-        (...args) => ({
-          // Combine all slices
-          ...createConfigSlice(...args),
-          ...createUISlice(...args),
-          ...createThreadSlice(...args),
-          ...createSyncSlice(...args),
+  const baseCreator: import('zustand').StateCreator<ChatStore, [], []> = (
+    ...args
+  ) => ({
+    // Combine all slices (cast to any to bridge differing middleware typings)
+    ...(createConfigSlice as any)(...args),
+    ...(createUISlice as any)(...args),
+    ...(createThreadSlice as any)(...args),
+    ...(createSyncSlice as any)(...args),
 
-          // Initialize with default config
-          config: {
-            apiUrl: defaultConfig.apiUrl || '',
-            assistantId: defaultConfig.assistantId || '',
-            apiKey: defaultConfig.apiKey || '',
-          },
+    // Initialize with default config
+    config: {
+      apiUrl: defaultConfig.apiUrl || '',
+      assistantId: defaultConfig.assistantId || '',
+      apiKey: defaultConfig.apiKey || '',
+    },
 
-          // Initialize thread ID if provided
-          threadId: initialThreadId ?? null,
+    // Initialize thread ID if provided
+    threadId: initialThreadId ?? null,
 
-          // Initialize sync options
-          syncOptions: {
-            enableUrlSync,
-            persistToLocalStorage,
-            syncFromPath,
-            threadIdPathPattern,
-          },
-        }),
-        {
+    // Initialize sync options
+    syncOptions: {
+      enableUrlSync,
+      persistToLocalStorage,
+      syncFromPath,
+      threadIdPathPattern,
+    },
+  });
+
+  const withDevtools = (config: any) =>
+    devtools(config as unknown as import('zustand').StateCreator<
+      ChatStore,
+      [],
+      [["zustand/devtools", never]]
+    >, {
+      name: 'ChatStore',
+      enabled: process.env.NODE_ENV === 'development',
+    });
+
+  if (persistToLocalStorage) {
+    return create<ChatStore>()(
+      withDevtools(
+        persist(baseCreator as any, {
           name: 'chat-storage',
-          // Only persist config (apiUrl, assistantId) - not UI state or threadId
-          partialize: (state) =>
-            persistToLocalStorage
-              ? {
-                  config: {
-                    apiUrl: state.config.apiUrl,
-                    assistantId: state.config.assistantId,
-                    // Don't persist apiKey in localStorage for security
-                  },
-                }
-              : {},
-        }
-      ),
-      {
-        name: 'ChatStore',
-        enabled: process.env.NODE_ENV === 'development',
-      }
+          partialize: (state: any) => ({
+            config: {
+              apiUrl: state.config.apiUrl,
+              assistantId: state.config.assistantId,
+            },
+          }),
+        }) as unknown as import('zustand').StateCreator<
+          ChatStore,
+          [],
+          [["zustand/devtools", never]]
+        >
+      )
+    );
+  }
+
+  return create<ChatStore>()(
+    withDevtools(
+      baseCreator as unknown as import('zustand').StateCreator<
+        ChatStore,
+        [],
+        [["zustand/devtools", never]]
+      >
     )
   );
 };

@@ -64,7 +64,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   enableUrlSync = false,
   syncFromPath = false,
   threadIdPathPattern,
-  persistToLocalStorage = true,
+  persistToLocalStorage = false,
   className,
   onConfigChange,
   onThreadChange,

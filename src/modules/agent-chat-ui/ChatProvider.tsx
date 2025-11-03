@@ -36,6 +36,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   const syncFromUrl = useChatStore((state) => state.syncFromUrl);
   const setSyncOptions = useChatStore((state) => state.setSyncOptions);
   const setThreadId = useChatStore((state) => state.setThreadId);
+  const setConfig = useChatStore((state) => state.setConfig);
   const config = useChatStore((state) => state.config);
   const threadId = useChatStore((state) => state.threadId);
 
@@ -58,6 +59,20 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
       setThreadId(options.initialThreadId);
     }
   }, [options?.initialThreadId, threadId, setThreadId]);
+
+  // Apply default config from options (does not overwrite URL values later)
+  useEffect(() => {
+    if (options?.defaultConfig) {
+      const { apiUrl, assistantId, apiKey } = options.defaultConfig;
+      const updates: Partial<typeof config> = {};
+      if (typeof apiUrl === 'string' && apiUrl.trim()) updates.apiUrl = apiUrl;
+      if (typeof assistantId === 'string' && assistantId.trim()) updates.assistantId = assistantId;
+      if (typeof apiKey === 'string' && apiKey.trim()) updates.apiKey = apiKey;
+      if (Object.keys(updates).length > 0) {
+        setConfig(updates);
+      }
+    }
+  }, [options?.defaultConfig, setConfig]);
 
   // Sync from URL on mount if enabled (skip if URL sync is disabled)
   useEffect(() => {
@@ -86,7 +101,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
 
   return (
     <ThreadProvider>
-      <StreamProvider>
+      <StreamProvider initialConfig={options?.defaultConfig}>
         <ArtifactProvider>{children}</ArtifactProvider>
       </StreamProvider>
     </ThreadProvider>

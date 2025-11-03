@@ -119,11 +119,14 @@ const StreamSession = ({
   );
 };
 
-export const StreamProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
+export const StreamProvider: React.FC<{
+  children: ReactNode;
+  initialConfig?: { apiUrl?: string; assistantId?: string; apiKey?: string };
+}> = ({ children, initialConfig }) => {
   const config = useChatStore((state) => state.config);
-  const { apiUrl, assistantId, apiKey } = config;
+  const apiUrl = config.apiUrl || initialConfig?.apiUrl || "";
+  const assistantId = config.assistantId || initialConfig?.assistantId || "";
+  const apiKey = config.apiKey || initialConfig?.apiKey || "";
 
   // Validate required config
   if (!apiUrl || !assistantId) {
